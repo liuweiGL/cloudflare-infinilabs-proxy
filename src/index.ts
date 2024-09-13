@@ -17,14 +17,12 @@ export default {
 		const parts = url.pathname.split('/');
 		const filename = parts.pop()!;
 		const newPathname = parts.concat(`elasticsearch-${filename}`).join('/');
-		// 这里替换为实际获取文件内容的逻辑，例如从另一个API或存储中获取
-		let fileContent;
+		let response: Response;
 		try {
-			const response = await fetch(`https://release.infinilabs.com${newPathname}`);
+			response = await fetch(`https://release.infinilabs.com${newPathname}`);
 			if (!response.ok) {
-				return new Response(null, { status: response.status, statusText: response.statusText });
+				return response;
 			}
-			fileContent = await response.arrayBuffer(); // 获取文件的ArrayBuffer内容
 		} catch (error: any) {
 			return new Response(`Failed to fetch the file: ${error.message}`, { status: 500 });
 		}
@@ -35,6 +33,6 @@ export default {
 			'Content-Disposition': `attachment; filename="${encodeURIComponent(filename)}"`,
 		});
 
-		return new Response(fileContent, { headers });
+		return new Response(response.body, { headers });
 	},
 } satisfies ExportedHandler<Env>;
